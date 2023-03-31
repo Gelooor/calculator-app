@@ -4,7 +4,7 @@ import Button from "./components/Button";
 
 export default function App() {
   const [number, setNumber] = useState({
-    current: "0",
+    current: "",
     prev: "",
   });
   const [display, setDisplay] = useState("0");
@@ -37,14 +37,15 @@ export default function App() {
   };
 
   const numberHandleClick = (text: string) => {
-    if (!display.includes(".") && text === ".") return;
+    if (number.current.includes(".") && text === ".") return;
 
     setNumber({ ...number, current: number.current + text });
   };
 
   const clearHandleClick = () => {
-    setNumber({ ...number, current: "0", prev: "" });
+    setNumber({ ...number, current: "", prev: "" });
     setOperator("");
+    setDisplay("0");
   };
 
   const reverseHandleClick = () => {
@@ -81,11 +82,13 @@ export default function App() {
     setNumber({ ...number, current: "", prev: calculation });
   };
 
-  const decimalHandleClick = (text: string) => {
-    if (!display.includes(".")) {
-      setNumber({ ...number, current: number.current + text });
-    }
-  };
+  // const decimalHandleClick = (text: string) => {
+
+  //     return;
+  //   } else {
+
+  //   }
+  // };
 
   const operatorHandleClick = (text: string) => {
     setOperator(text);
@@ -99,7 +102,7 @@ export default function App() {
     } else {
       setNumber({
         ...number,
-        current: "0",
+        current: "",
         prev: number.current,
       });
     }
@@ -108,6 +111,10 @@ export default function App() {
   useEffect(() => {
     setDisplay(number.current);
   }, [number.current]);
+
+  useEffect(() => {
+    setDisplay("0");
+  }, []);
 
   // const handleClick = (text: string) => {
   //   const value = parseInt(text, 10);
