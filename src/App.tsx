@@ -1,51 +1,58 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, createContext } from "react";
 
 import Button from "./components/Button";
 
+export const UserContext = createContext("");
+
 export default function App() {
   const [number, setNumber] = useState({
-    current: "",
+    current: "0",
     prev: "",
   });
-  const [display, setDisplay] = useState("0");
+  const [display, setDisplay] = useState("");
   const [operator, setOperator] = useState("");
 
-  const handleClick = (text: string) => {
-    const num = Number(text);
-    if (Number.isInteger(num) || text === ".") {
-      numberHandleClick(text);
-    } else {
-      switch (text) {
-        case "C":
-          clearHandleClick();
-          break;
-        case "+-":
-          reverseHandleClick();
-          break;
-        case "%":
-          percentHandleClick();
-          break;
-        case "=":
-          equalHandleClick();
-          break;
-        // case ".":
-        //   decimalHandleClick(text);
-        default:
-          operatorHandleClick(text);
+  const handleClick = useCallback(
+    (text: string) => {
+      const num = Number(text);
+      if (Number.isInteger(num) || text === ".") {
+        numberHandleClick(text);
+      } else {
+        switch (text) {
+          case "C":
+            clearHandleClick();
+            break;
+          case "+-":
+            reverseHandleClick();
+            break;
+          case "%":
+            percentHandleClick();
+            break;
+          case "=":
+            equalHandleClick();
+            break;
+          // case ".":
+          //   decimalHandleClick(text);
+          default:
+            operatorHandleClick(text);
+        }
       }
-    }
-  };
+    },
+    [number.current, number.prev, operator, display]
+  );
 
   const numberHandleClick = (text: string) => {
     if (number.current.includes(".") && text === ".") return;
 
-    setNumber({ ...number, current: number.current + text });
+    setNumber({
+      ...number,
+      current: number.current !== "0" ? number.current + text : text,
+    });
   };
 
   const clearHandleClick = () => {
-    setNumber({ ...number, current: "", prev: "" });
+    setNumber({ ...number, current: "0", prev: "" });
     setOperator("");
-    setDisplay("0");
   };
 
   const reverseHandleClick = () => {
@@ -82,23 +89,18 @@ export default function App() {
     setNumber({ ...number, current: "", prev: calculation });
   };
 
-  // const decimalHandleClick = (text: string) => {
-
-  //     return;
-  //   } else {
-
-  //   }
-  // };
+  // not working
+  const decimalHandleClick = (text: string) => {
+    if (!number.current.includes(".")) {
+      setNumber({ ...number, current: number.current + text });
+    }
+  };
 
   const operatorHandleClick = (text: string) => {
     setOperator(text);
 
     if (number.prev !== "") {
       equalHandleClick();
-      // setNumber({
-      //   ...number,
-      //   current: "0",
-      // });
     } else {
       setNumber({
         ...number,
@@ -111,106 +113,6 @@ export default function App() {
   useEffect(() => {
     setDisplay(number.current);
   }, [number.current]);
-
-  useEffect(() => {
-    setDisplay("0");
-  }, []);
-
-  // const handleClick = (text: string) => {
-  //   const value = parseInt(text, 10);
-
-  //   if (!Number.isNaN(value) || text === ".") {
-  //     inputNum(text);
-  //   } else {
-  //     if (text === "C") {
-  //       clear();
-  //     } else if (text === "+-") {
-  //       plusMinus();
-  //     } else if (text === "%") {
-  //       percent();
-  //     } else if (text === "=") {
-  //       equals(text);
-  //     } else {
-  //       operation(text);
-  //     }
-  //   }
-  // };
-
-  // const inputNum = (text: string) => {
-  //   // prevents spamming of period
-  //   if (currentValue.includes(".") && text === ".") return;
-
-  //   if (total) {
-  //     setPrevValue("");
-  //   }
-
-  //   // if current value is not empty, concatenate
-  //   currentValue || currentValue === "0"
-  //     ? setCurrentValue((prevValue) => prevValue + text)
-  //     : setCurrentValue(text);
-  //   setTotal(false);
-  // };
-
-  // const clear = () => {
-  //   setCurrentValue("");
-  //   setPrevValue("");
-  //   setDisplay("0");
-  // };
-
-  // const plusMinus = () => {
-  //   setCurrentValue((Number(currentValue) * -1).toString());
-  // };
-
-  // const percent = () => {
-  //   setCurrentValue((Number(currentValue) / 100).toString());
-  // };
-
-  // const operation = (text: string) => {
-  //   setTotal(false);
-  //   setOperator(text);
-
-  //   if (currentValue === "") return;
-
-  //   if (prevValue !== "") {
-  //     equals(text);
-  //   } else {
-  //     setPrevValue(currentValue);
-  //     setCurrentValue("");
-  //     setDisplay("");
-  //   }
-  // };
-
-  // const equals = (text: string) => {
-  //   if (text === "=") {
-  //     setTotal(true);
-  //   }
-
-  //   let calculation = "";
-  //   switch (operator) {
-  //     case "/":
-  //       calculation = String(Number(prevValue) / Number(currentValue));
-  //       break;
-  //     case "x":
-  //       calculation = String(Number(prevValue) * Number(currentValue));
-  //       break;
-  //     case "-":
-  //       calculation = String(Number(prevValue) - Number(currentValue));
-  //       break;
-  //     case "+":
-  //       calculation = String(Number(prevValue) + Number(currentValue));
-  //       break;
-  //     default:
-  //       return;
-  //   }
-
-  //   setDisplay("");
-  //   setPrevValue(calculation);
-  //   setCurrentValue("");
-  // };
-
-  // useEffect(() => {
-  //   setDisplay(currentValue);
-  // }, [currentValue]);
 
   // useEffect(() => {
   //   setDisplay("0");
@@ -237,7 +139,9 @@ export default function App() {
           ].map((arr: string[]) => {
             return arr.map((text: string, index: number) => {
               return (
-                <Button key={index} text={text} handleClick={handleClick} />
+                <UserContext.Provider value={text}>
+                  <Button key={index} handleClick={handleClick} />
+                </UserContext.Provider>
               );
             });
           })}

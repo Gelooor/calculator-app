@@ -1,9 +1,17 @@
+// interface IButtonProps {
+//   text: string;
+//   handleClick: Function;
+// }
+
+import { useContext } from "react";
+import { UserContext } from "../App";
+
 interface IButtonProps {
-  text: string;
   handleClick: Function;
 }
 
-export default function Button({ text, handleClick }: IButtonProps) {
+export default function Button({ handleClick }: IButtonProps) {
+  const text = useContext(UserContext);
   return (
     <button
       onClick={() => handleClick(text)}
